@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const Busboy = require('busboy');
+const WebSocket = require('ws');
+const parser = require('./parse')
 
 const PORT = 3033;
 const TMP_DIR = path.join(__dirname, 'tmp');
@@ -65,7 +67,31 @@ const server = http.createServer(async (req, res) => {
         res.end('Not Found');
     }
 });
+const wss = new WebSocket.Server({ server });
 
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+});
+
+wss.on('connection', (ws) => {
+    console.log('Client connected');
+
+    ws.on('message', (message) => {
+        message = message.toString()
+        if (message.includes('process=')) {
+            folderid = message.slice(8)
+            console.log('Received processing request for folderid:', folderid);
+
+        }
+
+        wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
+        });
+    });
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
 });

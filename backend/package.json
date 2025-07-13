@@ -11,12 +11,7 @@
     "dev": "nodemon node ."
   },
   "dependencies": {
-    "@ai-sdk/fireworks": "^0.2.15",
-    "ai": "^4.3.17",
     "busboy": "^1.6.0",
-    "dotenv": "^17.2.0",
-    "fireworks": "^2.2.7",
-    "luxon": "^3.7.1",
     "ws": "^8.18.3"
   }
 }
