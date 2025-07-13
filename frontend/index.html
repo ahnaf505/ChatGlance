@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat Summary Uploader</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
 </head>
 
 <body class="bg-gradient-to-br from-slate-800 to-slate-950 min-h-screen flex flex-col items-center justify-center p-6 text-white">
@@ -16,7 +17,7 @@
         <p class="text-lg md:text-xl mb-6 text-slate-300">Upload your whatsapp chat log (TXT or ZIP format, max 25MB) to generate insights and summaries.</p>
         <input type="file" id="fileUpload" name="fileUpload" class="filepond text-m" />
         <footer class="mt-4 text-lg text-slate-500">All uploaded data is stored and automatically deleted after 30 days for safety reasons.</footer>
-        <footer class="mt-7 text-xl text-white text-slate-500">© 2025 ChatGlance — Built by Ahnaf</footer>
+        <footer class="mt-7 text-m text-white text-slate-500">© 2025 ChatGlance — Built by Ahnaf</footer>
     </div>
     <div id="processingOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
         <button type="button" disabled class="flex items-center px-6 py-3 text-white bg-indigo-600 rounded-lg text-lg font-medium shadow-lg cursor-not-allowed" style="pointer-events: none;">
@@ -35,9 +36,8 @@
         maxFileSize: '25MB',
         allowMultiple: false,
         labelIdle: `<span class="text-xl md:text-2xl font-semibold">📁 Drag & Drop your file or <span class="text-yellow-400">Browse</span></span>`,
-        styleButtonRemoveItemPosition: 'right',
+        styleButtonRemoveItemPosition: 'right'
     });
-
 
     function showProcessingOverlay() {
         document.getElementById('processingOverlay').classList.remove('hidden');
@@ -47,11 +47,51 @@
         document.getElementById('processingOverlay').classList.add('hidden');
     }
 
-    pond.on('addfile', () => {
+    pond.on('addfile', async (error, fileItem) => {
+        if (error) return console.error(error);
         showProcessingOverlay();
-        setTimeout(() => {
-            hideProcessingOverlay();
-        }, 3000);
+
+        const file = fileItem.file;
+
+        try {
+            if (file.type === 'application/zip') {
+                const zip = await JSZip.loadAsync(file);
+                for (const filename in zip.files) {
+                    const entry = zip.files[filename];
+                    if (!entry.dir && filename.toLowerCase().endsWith('.txt')) {
+                        const content = await entry.async('blob');
+
+                        const formData = new FormData();
+                        formData.append('file', content, filename);
+
+                        const response = await fetch('http://localhost:3033/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const folderid = await response.text();
+                        break; // Stop after first .txt file
+                    }
+                }
+            } else if (file.type === 'text/plain') {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('http://localhost:3033/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const folderid = await response.text();
+            }
+
+        } catch (err) {
+            console.error('Failed to process file:', err);
+        } finally {
+            setTimeout(() => {
+                hideProcessingOverlay();
+            }, 500);
+        }
     });
     </script>
 </body>
