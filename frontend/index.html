@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Summary Uploader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-800 to-slate-950 min-h-screen flex flex-col items-center justify-center p-6 text-white">
+    <div class="max-w-3xl w-full text-center z-10">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">📊 ChatGlance</h1>
+        <p class="text-lg md:text-xl mb-6 text-slate-300">Upload your whatsapp chat log (TXT or ZIP format, max 25MB) to generate insights and summaries.</p>
+        <input type="file" id="fileUpload" name="fileUpload" class="filepond text-m" />
+        <footer class="mt-4 text-lg text-slate-500">All uploaded data is stored and automatically deleted after 30 days for safety reasons.</footer>
+        <footer class="mt-7 text-xl text-white text-slate-500">© 2025 ChatGlance — Built by Ahnaf</footer>
+    </div>
+    <div id="processingOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <button type="button" disabled class="flex items-center px-6 py-3 text-white bg-indigo-600 rounded-lg text-lg font-medium shadow-lg cursor-not-allowed" style="pointer-events: none;">
+            <svg class="mr-3 h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <circle cx="12" cy="12" r="10" stroke="white" stroke-width="4" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60" fill="none" />
+            </svg>
+            Processing…
+        </button>
+    </div>
+    <script>
+    FilePond.registerPlugin();
+
+    const pond = FilePond.create(document.querySelector('input[type="file"]'), {
+        acceptedFileTypes: ['application/zip', 'text/plain'],
+        maxFileSize: '25MB',
+        allowMultiple: false,
+        labelIdle: `<span class="text-xl md:text-2xl font-semibold">📁 Drag & Drop your file or <span class="text-yellow-400">Browse</span></span>`,
+        styleButtonRemoveItemPosition: 'right',
+    });
+
+
+    function showProcessingOverlay() {
+        document.getElementById('processingOverlay').classList.remove('hidden');
+    }
+
+    function hideProcessingOverlay() {
+        document.getElementById('processingOverlay').classList.add('hidden');
+    }
+
+    pond.on('addfile', () => {
+        showProcessingOverlay();
+        setTimeout(() => {
+            hideProcessingOverlay();
+        }, 3000);
+    });
+    </script>
+</body>
+
+</html>
