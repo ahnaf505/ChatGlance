@@ -84,7 +84,16 @@ wss.on('connection', (ws) => {
                 status: 'success', // status of parsing
                 chatters: '', // amount of chatter
                 topWordsPerUser: {}, // top 5 words per user
-                range: {} // range of date since start to last                
+                range: {}, // range of date since start to last                
+                timeBetweenMsg: {}, // time between each reply
+                topStartersPerUser: {}, // top message session starter used by each user
+                totalSessionCount: 0, // total amount of chatting session
+                messagesByEachUserCount: {}, // amount of messages sent by each user
+                avgMessagePerSession: 0, // average amount of total messages sent by each chatting session
+                minMessagePerSession: 0, // minimum amount of total messages sent by each chatting session
+                maxMessagePerSession: 0, // maximum amount of total messages sent by each chatting session
+                getTopEmojiPerUser: {}, // top emoji used by each user
+                messagesSentPerDay: {} // messages sent each day
             };
             try {
                 const filepath = path.join(__dirname, 'tmp', folderid, 'chats.txt');
@@ -112,10 +121,43 @@ wss.on('connection', (ws) => {
                 for (const user of chatters) {
                     chain = chain.then(() => {
                         return parser.getResponseTimes(parsed, user).then(result => {
-                            console.log(result); // Logs resolved result
+                            result.timeBetweenMsg = result;
                         });
                     });
                 }
+                // get most used conversation starter
+                for (const user of chatters) {
+                    const topstarted = parser.getTopSentenceStartersFuzzy(parsed, user, {
+                        maxWords: 3,
+                        minOccurrences: 2,
+                        similarityThreshold: 0.8
+                    });
+                    result.topStartersPerUser[user] = topstarted;
+                }
+
+                const sessionamount = parser.getChatSessions(parsed).length;
+                result.totalSessionCount = sessionamount;
+
+                // amount of total messages sent by each user
+                for (const user of chatters) {
+                    const amount = parser.countMessagesByUser(parsed, user);
+                    result.messagesByEachUserCount[user] = amount;
+                }
+
+                const sessionCounts = parser.getChatSessions(parsed).map(s => s.length);
+                result.avgMessagePerSession = (parsed.length / sessionCounts.length).toFixed(2);
+                result.minMessagePerSession = Math.min(...sessionCounts)
+                result.maxMessagePerSession = Math.max(...sessionCounts)
+
+                for (const user of chatters) {
+                    const topEmoji = parser.getTopEmojiForUser(parsed, user);
+                    result.getTopEmojiPerUser[user] = topEmoji;
+                }
+
+                const msgprday = parser.countMessagesPerDay(parsed);
+                result.messagesSentPerDay = msgprday;
+
+                // ------store to db ---- 
 
             } catch (err) {
                 const errormsg = {
