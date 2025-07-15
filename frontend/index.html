@@ -12,6 +12,16 @@
 </head>
 
 <body class="bg-gradient-to-br from-slate-800 to-slate-950 min-h-screen flex flex-col items-center justify-center p-6 text-white">
+    <!-- Error Modal -->
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-80">
+            <h2 class="text-lg font-semibold text-red-600 mb-2">Error</h2>
+            <p id="errorMessage" class="text-gray-800 mb-4">Something went wrong.</p>
+            <button onclick="closeErrorModal()" class="mt-2 w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded">
+                Close
+            </button>
+        </div>
+    </div>
     <div class="max-w-3xl w-full text-center z-10">
         <h1 class="text-4xl md:text-5xl font-bold mb-6">📊 ChatGlance</h1>
         <p class="text-lg md:text-xl mb-6 text-slate-300">Upload your whatsapp chat log (TXT or ZIP format, max 25MB) to generate insights and summaries.</p>
@@ -25,12 +35,13 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <circle cx="12" cy="12" r="10" stroke="white" stroke-width="4" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60" fill="none" />
             </svg>
-            Processing…
+            Uploading...
         </button>
     </div>
     <script>
     FilePond.registerPlugin();
-
+    let socket;
+    let folderid;
     const pond = FilePond.create(document.querySelector('input[type="file"]'), {
         acceptedFileTypes: ['application/zip', 'text/plain'],
         maxFileSize: '25MB',
@@ -46,6 +57,75 @@
     function hideProcessingOverlay() {
         document.getElementById('processingOverlay').classList.add('hidden');
     }
+
+    function setProcessingText(newText) {
+        const btn = document.querySelector('button[disabled]');
+        if (btn) btn.lastChild.textContent = ' ' + newText;
+    }
+
+    function showErrorModal(message) {
+        const modal = document.getElementById('errorModal');
+        const msgBox = document.getElementById('errorMessage');
+        msgBox.textContent = message;
+        modal.classList.remove('hidden');
+    }
+
+    function closeErrorModal() {
+        document.getElementById('errorModal').classList.add('hidden');
+    }
+
+    function waitForSocketConnection(ws) {
+        return new Promise((resolve) => {
+            if (ws.readyState === WebSocket.OPEN) return resolve();
+
+            ws.addEventListener('open', () => resolve());
+        });
+    }
+
+    function sendWhenReady(message) {
+        const interval = setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(message);
+                clearInterval(interval);
+            }
+        }, 100);
+    }
+
+    function waitForNextMessage(socket) {
+        return new Promise((resolve) => {
+            function handler(event) {
+                socket.removeEventListener('message', handler);
+                resolve(event.data);
+            }
+
+            socket.addEventListener('message', handler);
+        });
+    }
+
+
+    function handleWSResponse(msg) {
+        try {
+            const data = JSON.parse(msg);
+            if (data.status === 'error') {
+                showErrorModal(data.message);
+                return false;
+            }
+            return true; // status is 'success' or other
+        } catch (err) {
+            showErrorModal(data.message);
+            return false;
+        }
+    }
+
+    function extractAndStoreWhatsAppName(inputText) {
+        const match = inputText.match(/WhatsApp Chat with (.+)/i);
+        if (match && match[1]) {
+            const name = match[1].trim();
+            return name;
+        }
+    }
+
+
 
     pond.on('addfile', async (error, fileItem) => {
         if (error) return console.error(error);
@@ -69,7 +149,9 @@
                             body: formData
                         });
 
-                        const folderid = await response.text();
+                        const raw = await response.text(); // optional, if you want raw
+                        const data = JSON.parse(raw); // convert to object
+                        folderid = data.folder;
                         break; // Stop after first .txt file
                     }
                 }
@@ -82,15 +164,28 @@
                     body: formData
                 });
 
-                const folderid = await response.text();
+                const raw = await response.text(); // optional, if you want raw
+                const data = JSON.parse(raw); // convert to object
+                folderid = data.folder;
             }
-            //function to send to websocker
+
         } catch (err) {
             console.error('Failed to process file:', err);
         } finally {
-            setTimeout(() => {
-                hideProcessingOverlay();
-            }, 500);
+            (async () => {
+                socket = new WebSocket('ws://localhost:3034');
+                await waitForSocketConnection(socket);
+            })();
+            sendWhenReady(`process=${folderid}`)
+            setProcessingText("Uploading complete...")
+            const msg = await waitForNextMessage(socket);
+            status = handleWSResponse(msg);
+            if (status === true) {
+                sendWhenReady('wheresummary');
+                const summaryid = await waitForNextMessage(socket);
+            }
+
+            hideProcessingOverlay();
         }
     });
     </script>

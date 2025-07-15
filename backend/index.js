@@ -4,28 +4,29 @@ const path = require('path');
 const crypto = require('crypto');
 const Busboy = require('busboy');
 const WebSocket = require('ws');
-const parser = require('./parse')
+const parser = require('./parse'); // Assuming this is custom
 
-const PORT = 3033;
+const HTTP_PORT = 3033;
+const WS_PORT = 3034;
 const TMP_DIR = path.join(__dirname, 'tmp');
 
+// Utility: Generate unique directory
 async function generateUniqueDir(baseDir) {
     while (true) {
         const dirName = crypto.randomBytes(8).toString('hex');
         const fullPath = path.join(baseDir, dirName);
         try {
             await fs.promises.access(fullPath);
-            // Path exists, retry
         } catch (err) {
-            // Path does not exist, safe to use
             await fs.promises.mkdir(fullPath, { recursive: true });
             return { dirName, fullPath };
         }
     }
 }
 
-const server = http.createServer(async (req, res) => {
-    // Set CORS headers
+// --- HTTP Server for Uploads ---
+const httpServer = http.createServer(async (req, res) => {
+    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -38,17 +39,13 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && req.url === '/upload') {
         try {
-            // Ensure base tmp dir exists
             await fs.promises.mkdir(TMP_DIR, { recursive: true });
-
             const { dirName, fullPath } = await generateUniqueDir(TMP_DIR);
             const busboy = Busboy({ headers: req.headers });
 
             busboy.on('file', (fieldname, file, info) => {
-                const { filename } = info;
-                const savePath = path.join(fullPath, filename);
-                const writeStream = fs.createWriteStream(savePath);
-                file.pipe(writeStream);
+                const savePath = path.join(fullPath, "chats.txt");
+                file.pipe(fs.createWriteStream(savePath));
             });
 
             busboy.on('finish', () => {
@@ -59,7 +56,7 @@ const server = http.createServer(async (req, res) => {
             req.pipe(busboy);
         } catch (err) {
             console.error('Upload error:', err);
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.writeHead(500);
             res.end('Internal Server Error');
         }
     } else {
@@ -67,31 +64,64 @@ const server = http.createServer(async (req, res) => {
         res.end('Not Found');
     }
 });
-const wss = new WebSocket.Server({ server });
 
-server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+httpServer.listen(HTTP_PORT, () => {
+    console.log(`HTTP server running at http://localhost:${HTTP_PORT}`);
 });
+
+// --- Dedicated WebSocket Server ---
+const wss = new WebSocket.Server({ port: WS_PORT });
 
 wss.on('connection', (ws) => {
-    console.log('Client connected');
+            console.log('WebSocket client connected');
 
-    ws.on('message', (message) => {
-        message = message.toString()
-        if (message.includes('process=')) {
-            folderid = message.slice(8)
-            console.log('Received processing request for folderid:', folderid);
+            ws.on('message', (message) => {
+                    message = message.toString();
+                    if (message.includes('process=')) {
+                        const folderid = message.slice(8);
+                        console.log('Received processing request for folderid:', folderid);
+                        try {
+                            const result = {
+                                status: 'success',
+                                chatters: '',
+                                topWordsPerUser: {},
+                                totalMessages: ''
+                            };
 
-        }
 
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
-    });
+                            const filepath = path.join(__dirname, 'tmp', folderid, 'chats.txt');
+                            const fileContent = fs.readFileSync(filepath, 'utf8');
+                            const cleanedChat = parser.cleanChatLines(fileContent).join('\n');
+                            const parsed = parser.parseChat(cleanedChat);
+                            const qcheck = JSON.stringify(parsed);
+                            if (qcheck === '[]') {
+                                throw new Error("Not a valid whatsapp chat log");
+                            }
+                            const chatters = parser.getUniqueUsers(parsed)
+                            if (chatters.length > 2) {
+                                throw new Error("Not a valid personal whatsapp chat");
+                            }
+                            const amountofchatters = chatters.length;
+                            for (const user of chatters) {
+                                const wordcount = parser.getTopWordsPerUser(parsed, user);
+                                const top5 = parser.getTop5Words(wordcount);
+                                result.topWordsPerUser[user] = top5;
+                            }
+                            const range = parser.getChatRange(parsed)
+                            console.log(range)
+                        } catch (err) {
+                            const errormsg = {
+                                status: 'error',
+                                message: err.message,
+                            };
+                            ws.send(JSON.stringify(errormsg));
+                            console.log(err)
+                        }
+                    }});
 
-    ws.on('close', () => {
-        console.log('Client disconnected');
-    });
-});
+                ws.on('close', () => {
+                    console.log('WebSocket client disconnected');
+                });
+            });
+
+        console.log(`WebSocket server running at ws://localhost:${WS_PORT}`);
