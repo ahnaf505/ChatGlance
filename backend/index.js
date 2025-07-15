@@ -4,7 +4,8 @@ const path = require('path');
 const crypto = require('crypto');
 const Busboy = require('busboy');
 const WebSocket = require('ws');
-const parser = require('./parse'); // Assuming this is custom
+const parser = require('./parse');
+let mongo = require('mongodb');
 
 const HTTP_PORT = 3033;
 const WS_PORT = 3034;
@@ -158,6 +159,10 @@ wss.on('connection', (ws) => {
                 result.messagesSentPerDay = msgprday;
 
                 // ------store to db ---- 
+
+                const deletePath = path.join(__dirname, 'tmp', folderid);
+                fs.rmSync(deletePath, { recursive: true, force: true });
+
 
             } catch (err) {
                 const errormsg = {
