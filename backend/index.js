@@ -73,55 +73,65 @@ httpServer.listen(HTTP_PORT, () => {
 const wss = new WebSocket.Server({ port: WS_PORT });
 
 wss.on('connection', (ws) => {
-            console.log('WebSocket client connected');
+    console.log('WebSocket client connected');
 
-            ws.on('message', (message) => {
-                    message = message.toString();
-                    if (message.includes('process=')) {
-                        const folderid = message.slice(8);
-                        console.log('Received processing request for folderid:', folderid);
-                        try {
-                            const result = {
-                                status: 'success',
-                                chatters: '',
-                                topWordsPerUser: {},
-                                totalMessages: ''
-                            };
+    ws.on('message', (message) => {
+        message = message.toString();
+        if (message.includes('process=')) {
+            const folderid = message.slice(8);
+            console.log('Received processing request for folderid:', folderid);
+            const result = {
+                status: 'success', // status of parsing
+                chatters: '', // amount of chatter
+                topWordsPerUser: {}, // top 5 words per user
+                range: {} // range of date since start to last                
+            };
+            try {
+                const filepath = path.join(__dirname, 'tmp', folderid, 'chats.txt');
+                const fileContent = fs.readFileSync(filepath, 'utf8');
+                const cleanedChat = parser.cleanChatLines(fileContent).join('\n');
+                const parsed = parser.parseChat(cleanedChat);
+                const qcheck = JSON.stringify(parsed);
+                if (qcheck === '[]') {
+                    throw new Error("Not a valid whatsapp chat log");
+                }
+                const chatters = parser.getUniqueUsers(parsed)
+                if (chatters.length > 2) {
+                    throw new Error("Not a valid personal whatsapp chat");
+                }
+                result.chatters = chatters;
+                const amountofchatters = chatters.length;
+                for (const user of chatters) {
+                    const wordcount = parser.getTopWordsPerUser(parsed, user);
+                    const top5 = parser.getTop5Words(wordcount);
+                    result.topWordsPerUser[user] = top5;
+                }
+                const range = parser.getChatRange(parsed)
+                result.range = range;
+                let chain = Promise.resolve();
+                for (const user of chatters) {
+                    chain = chain.then(() => {
+                        return parser.getResponseTimes(parsed, user).then(result => {
+                            console.log(result); // Logs resolved result
+                        });
+                    });
+                }
 
+            } catch (err) {
+                const errormsg = {
+                    status: 'error',
+                    message: err.message,
+                };
+                ws.send(JSON.stringify(errormsg));
+                console.log(err)
+            }
+            console.log(result) // DEBUG LINE - REMOVE ON PROD
+        }
+    });
 
-                            const filepath = path.join(__dirname, 'tmp', folderid, 'chats.txt');
-                            const fileContent = fs.readFileSync(filepath, 'utf8');
-                            const cleanedChat = parser.cleanChatLines(fileContent).join('\n');
-                            const parsed = parser.parseChat(cleanedChat);
-                            const qcheck = JSON.stringify(parsed);
-                            if (qcheck === '[]') {
-                                throw new Error("Not a valid whatsapp chat log");
-                            }
-                            const chatters = parser.getUniqueUsers(parsed)
-                            if (chatters.length > 2) {
-                                throw new Error("Not a valid personal whatsapp chat");
-                            }
-                            const amountofchatters = chatters.length;
-                            for (const user of chatters) {
-                                const wordcount = parser.getTopWordsPerUser(parsed, user);
-                                const top5 = parser.getTop5Words(wordcount);
-                                result.topWordsPerUser[user] = top5;
-                            }
-                            const range = parser.getChatRange(parsed)
-                            console.log(range)
-                        } catch (err) {
-                            const errormsg = {
-                                status: 'error',
-                                message: err.message,
-                            };
-                            ws.send(JSON.stringify(errormsg));
-                            console.log(err)
-                        }
-                    }});
+    ws.on('close', () => {
+        console.log('WebSocket client disconnected');
+    });
+});
 
-                ws.on('close', () => {
-                    console.log('WebSocket client disconnected');
-                });
-            });
-
-        console.log(`WebSocket server running at ws://localhost:${WS_PORT}`);
+console.log(`WebSocket server running at ws://localhost:${WS_PORT}`);

@@ -190,10 +190,9 @@ function getResponseTimes(parsedData, targetUser) {
 
     return {
       user: targetUser,
-      fastestMinutes: fastest,
-      slowestMinutes: slowest,
-      averageMinutes: average,
-      summary: `${targetUser} - Fastest: ${formatTime(fastest)}, Slowest: ${formatTime(slowest)}, Average: ${formatTime(average)} (${responseTimes.length} replies)`
+      fastestMinutes: formatTime(fastest),
+      slowestMinutes: formatTime(slowest),
+      averageMinutes: formatTime(average),
     };
   });
 }function formatTime(minutes) {
