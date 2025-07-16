@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Summary Uploader</title>
+    <title>ChatGlance | Discover how you chat with others!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
@@ -35,7 +35,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <circle cx="12" cy="12" r="10" stroke="white" stroke-width="4" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60" fill="none" />
             </svg>
-            Uploading...
+            Uploading and processing...
         </button>
     </div>
     <script>
@@ -58,11 +58,6 @@
         document.getElementById('processingOverlay').classList.add('hidden');
     }
 
-    function setProcessingText(newText) {
-        const btn = document.querySelector('button[disabled]');
-        if (btn) btn.lastChild.textContent = ' ' + newText;
-    }
-
     function showErrorModal(message) {
         const modal = document.getElementById('errorModal');
         const msgBox = document.getElementById('errorMessage');
@@ -83,13 +78,22 @@
     }
 
     function sendWhenReady(message) {
-        const interval = setInterval(() => {
+        return new Promise((resolve) => {
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(message);
-                clearInterval(interval);
+                return resolve();
             }
-        }, 100);
+
+            const interval = setInterval(() => {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(message);
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 100);
+        });
     }
+
 
     function waitForNextMessage(socket) {
         return new Promise((resolve) => {
@@ -172,20 +176,18 @@
         } catch (err) {
             console.error('Failed to process file:', err);
         } finally {
-            (async () => {
-                socket = new WebSocket('ws://localhost:3034');
-                await waitForSocketConnection(socket);
-            })();
-            sendWhenReady(`process=${folderid}`)
-            setProcessingText("Uploading complete...")
-            const msg = await waitForNextMessage(socket);
-            status = handleWSResponse(msg);
-            if (status === true) {
-                sendWhenReady('wheresummary');
-                const summaryid = await waitForNextMessage(socket);
-            }
+            socket = new WebSocket('ws://localhost:3034');
+            await waitForSocketConnection(socket);
 
-            hideProcessingOverlay();
+            await sendWhenReady(`process=${folderid}`);
+
+            const msg = await waitForNextMessage(socket);
+            const status = handleWSResponse(msg);
+
+            if (status === true) {
+                await sendWhenReady('wheresummary');
+                const summaryid = await waitForNextMessage(socket);
+                window.location.href = `/summary.html?id=${summaryid}`;            }
         }
     });
     </script>
