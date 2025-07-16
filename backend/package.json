@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "busboy": "^1.6.0",
-    "mongodb": "^6.17.0",
+    "firebase": "^11.10.0",
     "ws": "^8.18.3"
   }
 }

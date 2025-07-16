@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const Busboy = require('busboy');
 const WebSocket = require('ws');
 const parser = require('./parse');
-let mongo = require('mongodb');
+const db = require('./db');
 
 const HTTP_PORT = 3033;
 const WS_PORT = 3034;
@@ -24,6 +24,25 @@ async function generateUniqueDir(baseDir) {
         }
     }
 }
+
+function waitForOneMessage(ws) {
+    return new Promise((resolve, reject) => {
+        const onMessage = (data) => {
+            try {
+                const parsed = JSON.parse(data.toString());
+                resolve(parsed);
+            } catch {
+                resolve(data.toString()); // fallback to raw string
+            } finally {
+                ws.off('message', onMessage); // clean up listener
+            }
+        };
+
+        ws.on('message', onMessage);
+        ws.on('error', reject);
+    });
+}
+
 
 // --- HTTP Server for Uploads ---
 const httpServer = http.createServer(async (req, res) => {
@@ -56,10 +75,39 @@ const httpServer = http.createServer(async (req, res) => {
 
             req.pipe(busboy);
         } catch (err) {
-            console.error('Upload error:', err);
             res.writeHead(500);
             res.end('Internal Server Error');
         }
+    } else if (req.method === 'POST' && req.url === '/summary') {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString(); // expecting plain text ID
+        });
+
+        req.on('end', async () => {
+            const id = body.trim();
+
+            if (!id) {
+                res.writeHead(400);
+                res.end('Missing session ID');
+                return;
+            }
+
+            try {
+                const data = await db.readStats(id);
+                if (data) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(data));
+                } else {
+                    res.writeHead(404);
+                    res.end('Session not found');
+                }
+            } catch (err) {
+                res.writeHead(500);
+                res.end('Internal Server Error');
+            }
+        });
+
     } else {
         res.writeHead(404);
         res.end('Not Found');
@@ -74,13 +122,11 @@ httpServer.listen(HTTP_PORT, () => {
 const wss = new WebSocket.Server({ port: WS_PORT });
 
 wss.on('connection', (ws) => {
-    console.log('WebSocket client connected');
 
     ws.on('message', (message) => {
         message = message.toString();
         if (message.includes('process=')) {
             const folderid = message.slice(8);
-            console.log('Received processing request for folderid:', folderid);
             const result = {
                 status: 'success', // status of parsing
                 chatters: '', // amount of chatter
@@ -157,8 +203,21 @@ wss.on('connection', (ws) => {
 
                 const msgprday = parser.countMessagesPerDay(parsed);
                 result.messagesSentPerDay = msgprday;
+                (async () => {
+                    try {
+                        const sessionid = await db.generateUniqueSessionId();
+                        await db.createStats(sessionid, result);
 
-                // ------store to db ---- 
+                        ws.send(JSON.stringify({ status: 'success' }));
+
+                        const msg = await waitForOneMessage(ws);
+                        if (msg === 'wheresummary') {
+                            ws.send(sessionid);
+                        }
+                    } catch (err) {
+                        ws.send(JSON.stringify({ status: 'error', message: err.message }));
+                    }
+                })();
 
                 const deletePath = path.join(__dirname, 'tmp', folderid);
                 fs.rmSync(deletePath, { recursive: true, force: true });
@@ -169,16 +228,16 @@ wss.on('connection', (ws) => {
                     status: 'error',
                     message: err.message,
                 };
-                ws.send(JSON.stringify(errormsg));
-                console.log(err)
-            }
-            console.log(result) // DEBUG LINE - REMOVE ON PROD
+                ws.send(JSON.stringify(errormsg));            }
         }
     });
 
-    ws.on('close', () => {
-        console.log('WebSocket client disconnected');
-    });
 });
 
 console.log(`WebSocket server running at ws://localhost:${WS_PORT}`);
+
+// createStats,
+//  readStats,
+//  updateStats,
+//  deleteStats,
+//  generateUniqueSessionId

@@ -42,6 +42,9 @@
     FilePond.registerPlugin();
     let socket;
     let folderid;
+    const WS_URL = "ws://localhost:3034";
+    const UPLOAD_URL = "http://localhost:3033/upload";
+    const SUMMARY_PAGE = "summary.html";
     const pond = FilePond.create(document.querySelector('input[type="file"]'), {
         acceptedFileTypes: ['application/zip', 'text/plain'],
         maxFileSize: '25MB',
@@ -111,6 +114,7 @@
         try {
             const data = JSON.parse(msg);
             if (data.status === 'error') {
+                hideProcessingOverlay();
                 showErrorModal(data.message);
                 return false;
             }
@@ -148,7 +152,7 @@
                         const formData = new FormData();
                         formData.append('file', content, filename);
 
-                        const response = await fetch('http://localhost:3033/upload', {
+                        const response = await fetch(UPLOAD_URL, {
                             method: 'POST',
                             body: formData
                         });
@@ -163,7 +167,7 @@
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const response = await fetch('http://localhost:3033/upload', {
+                const response = await fetch(UPLOAD_URL, {
                     method: 'POST',
                     body: formData
                 });
@@ -176,7 +180,7 @@
         } catch (err) {
             console.error('Failed to process file:', err);
         } finally {
-            socket = new WebSocket('ws://localhost:3034');
+            socket = new WebSocket(WS_URL);
             await waitForSocketConnection(socket);
 
             await sendWhenReady(`process=${folderid}`);
@@ -187,7 +191,7 @@
             if (status === true) {
                 await sendWhenReady('wheresummary');
                 const summaryid = await waitForNextMessage(socket);
-                window.location.href = `/summary.html?id=${summaryid}`;            }
+                window.location.href = `/${SUMMARY_PAGE}?id=${summaryid}`;            }
         }
     });
     </script>
