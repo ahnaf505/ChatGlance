@@ -125,16 +125,6 @@
         }
     }
 
-    function extractAndStoreWhatsAppName(inputText) {
-        const match = inputText.match(/WhatsApp Chat with (.+)/i);
-        if (match && match[1]) {
-            const name = match[1].trim();
-            return name;
-        }
-    }
-
-
-
     pond.on('addfile', async (error, fileItem) => {
         if (error) return console.error(error);
         showProcessingOverlay();

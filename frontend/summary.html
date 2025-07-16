@@ -47,9 +47,21 @@
     <div id="content" class="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-6 space-y-8 hidden">
         <h1 class="text-2xl font-bold flex items-center gap-2">📊 ChatGlance - Chat Summary</h1>
         <p class="text-sm text-gray-500">This data will be removed within 30 days since the first upload.</p>
-        <!-- top 5 words -->
+        <section class="my-6">
+            <div class="flex items-center justify-center gap-6 text-lg font-bold text-gray-800">
+                <div id="person1-name" class="flex items-center gap-2">
+                    <span class="text-blue-700">←</span>
+                    <span></span>
+                </div>
+                <div class="text-gray-400"><---></div>
+                <div id="person2-name" class="flex items-center gap-2">
+                    <span></span>
+                    <span class="text-red-700">→</span>
+                </div>
+            </div>
+        </section>
         <section>
-            <h2 class="text-xl font-semibold mb-2">🧑‍💬 Top 5 Words</h2>
+            <h2 class="text-xl font-semibold mb-2">💬 Top 5 Words</h2>
             <div id="person1" class="mb-2 font-medium"></div>
             <div class="flex flex-wrap gap-2 mb-4">
                 <span id="person1-word1" class="px-3 py-1 rounded-full bg-blue-100 text-blue-800"></span>
@@ -83,7 +95,7 @@
             </div>
         </section>
         <section>
-            <h2 class="text-xl font-semibold mb-2">🕒 Time between messages</h2>
+            <h2 class="text-xl font-semibold mb-2">🕒 Time between each other's messages</h2>
             <table class="min-w-full text-sm table-auto border border-gray-200">
                 <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                     <tr>
@@ -95,16 +107,16 @@
                 </thead>
                 <tbody>
                     <tr class="border-t">
-                        <td class="p-2">IMG@1</td>
-                        <td class="p-2 text-green-600">2s</td>
-                        <td class="p-2 text-yellow-600">18s</td>
-                        <td class="p-2 text-red-600">2m 14s</td>
+                        <td id="person1" class="p-2"></td>
+                        <td id="person1-fastest" class="p-2 text-green-600"></td>
+                        <td id="person1-average" class="p-2 text-yellow-600"></td>
+                        <td id="person1-slowest" class="p-2 text-red-600"></td>
                     </tr>
                     <tr class="border-t">
-                        <td class="p-2">fdigsign&8</td>
-                        <td class="p-2 text-green-600">1s</td>
-                        <td class="p-2 text-yellow-600">22s</td>
-                        <td class="p-2 text-red-600">3m 7s</td>
+                        <td id="person2" class="p-2"></td>
+                        <td id="person2-fastest" class="p-2 text-green-600">1s</td>
+                        <td id="person2-average" class="p-2 text-yellow-600">22s</td>
+                        <td id="person2-slowest" class="p-2 text-red-600">3m 7s</td>
                     </tr>
                 </tbody>
             </table>
@@ -112,55 +124,47 @@
         <!-- Most Common Conversation Starter -->
         <section>
             <h2 class="text-xl font-semibold mb-2">💬 Most Common Conversation Starter</h2>
-            <blockquote class="border-l-4 border-gray-400 pl-4 italic text-gray-700 mb-2">Session 1: "Hey, are you free?"</blockquote>
-            <blockquote class="border-l-4 border-gray-400 pl-4 italic text-gray-700 mb-2">Session 2: "Where are you?"</blockquote>
-            <blockquote class="border-l-4 border-gray-400 pl-4 italic text-gray-700">Session 3: "Done with work?"</blockquote>
+            <blockquote id="person1-starter" class="border-l-4 border-gray-400 pl-4 italic text-gray-700 mb-2"></blockquote>
+            <blockquote id="person2-starter" class="border-l-4 border-gray-400 pl-4 italic text-gray-700 mb-2"></blockquote>
         </section>
         <!-- Total Chat Duration -->
         <section>
             <h2 class="text-xl font-semibold mb-2">⏳ Total Chat Duration</h2>
             <div class="text-blue-800">
-                🗓️ <strong>Start:</strong> Jan 12, 2024  🕓 <strong>End:</strong> Jul 12, 2025
+                🗓️ <strong>Start:</strong> <span id="start-date">Jan 12, 2024</span>
+                🕓 <strong>End:</strong> <span id="end-date">Jul 12, 2025</span>
             </div>
             <div class="text-blue-700 mt-1">
-                🕰️ <strong>Total Duration:</strong> 1 year, 6 months
+                🕰️ <strong>Total Duration:</strong> <span id="total-duration">1 year, 6 months</span>
             </div>
         </section>
         <!-- Average Messages per Session -->
         <section>
-            <h2 class="text-xl font-semibold mb-2">🗂️ Average Messages per Session</h2>
-            <div class="flex gap-4">
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg p-4 w-1/2 text-center">
-                    <div class="text-gray-700 font-bold">IMG@1</div>
-                    <div class="text-lg">35 msgs/session</div>
+            <h2 class="text-xl font-semibold mb-2">🗂️ Total Messages per Session</h2>
+            <div class="flex flex-col gap-3 text-center sm:flex-row sm:justify-between">
+                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 flex-1">
+                    <div class="text-gray-700 font-semibold text-sm">Minimum</div>
+                    <div id="min-msgpersession" class="text-xl font-bold text-green-700">0</div>
+                    <div class="text-sm text-gray-500">messages/session</div>
                 </div>
-                <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg p-4 w-1/2 text-center">
-                    <div class="text-gray-700 font-bold">fdigsign&8</div>
-                    <div class="text-lg">27 msgs/session</div>
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 flex-1">
+                    <div class="text-gray-700 font-semibold text-sm">Average</div>
+                    <div id="avg-msgpersession" class="text-xl font-bold text-blue-700">0</div>
+                    <div class="text-sm text-gray-500">messages/session</div>
+                </div>
+                <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 flex-1">
+                    <div class="text-gray-700 font-semibold text-sm">Maximum</div>
+                    <div id="max-msgpersession" class="text-xl font-bold text-red-700">0</div>
+                    <div class="text-sm text-gray-500">messages/session</div>
                 </div>
             </div>
         </section>
         <!-- Number of Chatting Sessions -->
         <section>
             <h2 class="text-xl font-semibold mb-2">📅 Number of Chatting Sessions</h2>
-            <table class="min-w-full text-sm table-auto border border-gray-200">
-                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                    <tr>
-                        <th class="p-2 text-left">User</th>
-                        <th class="p-2 text-left">Sessions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="border-t">
-                        <td class="p-2">IMG@1</td>
-                        <td class="p-2"><span class="text-blue-800">████████</span> (48)</td>
-                    </tr>
-                    <tr class="border-t">
-                        <td class="p-2">fdigsign&8</td>
-                        <td class="p-2"><span class="text-blue-600">███████</span> (42)</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="session-count" class="inline-block bg-blue-100 text-blue-800 text-lg font-bold px-4 py-2 rounded-xl shadow-sm">
+                12 Sessions
+            </div>
         </section>
         <!-- Total Messages Sent -->
         <section>
@@ -174,12 +178,12 @@
                 </thead>
                 <tbody>
                     <tr class="border-t">
-                        <td class="p-2">IMG@1</td>
-                        <td class="p-2">1,243</td>
+                        <td id="person1" class="p-2"></td>
+                        <td id="person1-totalmessages" class="p-2"></td>
                     </tr>
                     <tr class="border-t">
-                        <td class="p-2">fdigsign&8</td>
-                        <td class="p-2">1,098</td>
+                        <td id="person2" class="p-2"></td>
+                        <td id="person2-totalmessages" class="p-2"></td>
                     </tr>
                 </tbody>
             </table>
@@ -233,13 +237,84 @@
         emoji2.textContent = em2;
     }
 
+    function updateAllResponseTimes(fastest1, average1, slowest1, fastest2, average2, slowest2) {
+        const map = {
+            "person1-fastest": fastest1,
+            "person1-average": average1,
+            "person1-slowest": slowest1,
+            "person2-fastest": fastest2,
+            "person2-average": average2,
+            "person2-slowest": slowest2,
+        };
+
+        for (const [id, value] of Object.entries(map)) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+    }
+
+    function updateStarters(person1, starter1, person2, starter2) {
+        const el1 = document.getElementById("person1-starter");
+        const el2 = document.getElementById("person2-starter");
+
+        if (el1) el1.textContent = `${person1}: "${starter1}"`;
+        if (el2) el2.textContent = `${person2}: "${starter2}"`;
+    }
+
+    function updateDateRange(startDate, endDate, totalDuration) {
+        const startEl = document.getElementById("start-date");
+        const endEl = document.getElementById("end-date");
+        const durationEl = document.getElementById("total-duration");
+
+        if (startEl) startEl.textContent = startDate;
+        if (endEl) endEl.textContent = endDate;
+        if (durationEl) durationEl.textContent = totalDuration;
+    }
+
+    function updateMessagesPerSession(msgs1, msgs2) {
+        const el1 = document.getElementById("person1-msgpersession");
+        const el2 = document.getElementById("person2-msgpersession");
+
+        if (el1) el1.textContent = msgs1;
+        if (el2) el2.textContent = msgs2;
+    }
+
+    function updateSessionCount(count) {
+        const el = document.getElementById("session-count");
+        if (el) el.textContent = `${count} Sessions`;
+    }
+
+    function updateTotalMessagesSent(person1total, person2total) {
+        const el1 = document.getElementById("person1-totalmessages");
+        const el2 = document.getElementById("person2-totalmessages");
+
+        if (el1) el1.textContent = person1total;
+        if (el2) el2.textContent = person2total;
+    }
+
+    function updateGlobalMsgStats(avg, min, max) {
+        const avgEl = document.getElementById("avg-msgpersession");
+        const minEl = document.getElementById("min-msgpersession");
+        const maxEl = document.getElementById("max-msgpersession");
+
+        if (avgEl) avgEl.textContent = avg;
+        if (minEl) minEl.textContent = min;
+        if (maxEl) maxEl.textContent = max;
+    }
+
 
     //example uses
-    updatePersonText("person1", "person2");
+    updatePersonText("per1", "per2");
     updatePersonWords(["word1-pr1", "word2-pr1", "word3-pr1", "word4-pr1", "word5-pr1"],
         ["word1-pr2", "word2-pr2", "word3-pr2", "word4-pr2", "word5-pr2"], );
     updateEmoji("😂", "😂");
-
+    updateAllResponseTimes("1s", "12s", "2m 3s", "800ms", "9s", "1m 45s");
+    updateStarters("per1", "hi yo", "per2", "wassup")
+    updateDateRange("March 3, 2022", "July 16, 2025", "3 years, 4 months, 13 days");
+    updateMessagesPerSession("50", "24");
+    updateSessionCount("200");
+    updateTotalMessagesSent("5000", "7500")
+    updateGlobalMsgStats(34, 12, 58)
 
     async function fetchSummary() {
         try {
