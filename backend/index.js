@@ -132,7 +132,7 @@ wss.on('connection', (ws) => {
                 chatters: '', // amount of chatter
                 topWordsPerUser: {}, // top 5 words per user
                 range: {}, // range of date since start to last                
-                timeBetweenMsg: {}, // time between each reply
+                timeBetweenMsg: [], // time between each reply
                 topStartersPerUser: {}, // top message session starter used by each user
                 totalSessionCount: 0, // total amount of chatting session
                 messagesByEachUserCount: {}, // amount of messages sent by each user
@@ -167,8 +167,8 @@ wss.on('connection', (ws) => {
                 let chain = Promise.resolve();
                 for (const user of chatters) {
                     chain = chain.then(() => {
-                        return parser.getResponseTimes(parsed, user).then(result => {
-                            result.timeBetweenMsg = result;
+                        return parser.getResponseTimes(parsed, user).then(timemsg => {
+                            result.timeBetweenMsg.push(timemsg);
                         });
                     });
                 }
@@ -226,9 +226,22 @@ wss.on('connection', (ws) => {
             } catch (err) {
                 const errormsg = {
                     status: 'error',
-                    message: err.message,
+                    message: '',
                 };
-                ws.send(JSON.stringify(errormsg));            }
+
+                if (err.code === 'ENOENT') {
+                    errormsg.message = 'Invalid file format';
+                } else if (err.code === 'EACCES') {
+                    errormsg.message = 'Permission denied';
+                } else {
+                    errormsg.message = err.message;
+                }
+                const deletePath = path.join(__dirname, 'tmp', folderid);
+                fs.rmSync(deletePath, { recursive: true, force: true });
+
+                ws.send(JSON.stringify(errormsg));
+            }
+
         }
     });
 

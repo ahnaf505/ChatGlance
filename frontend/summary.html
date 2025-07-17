@@ -10,11 +10,28 @@
     <style>
     body {
         font-family: 'Noto Color Emoji', sans-serif;
+
+        .calendar-day {
+            height: 3.5rem;
+        }
+
+        .empty-day {
+            height: 3.5rem;
+        }
     }
     </style>
 </head>
 
 <body class="bg-gray-50 text-gray-900 font-sans p-6">
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-80">
+            <h2 class="text-lg font-semibold text-red-600 mb-2">Error</h2>
+            <p id="errorMessage" class="text-gray-800 mb-4">Something went wrong.</p>
+            <button onclick="closeErrorModal()" class="mt-2 w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded">
+                Close
+            </button>
+        </div>
+    </div>
     <div id="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
         <div role="status">
             <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,12 +66,14 @@
         <p class="text-sm text-gray-500">This data will be removed within 30 days since the first upload.</p>
         <section class="my-6">
             <div class="flex items-center justify-center gap-6 text-lg font-bold text-gray-800">
-                <div id="person1-name" class="flex items-center gap-2">
+                <div id="person1" class="flex items-center gap-2">
                     <span class="text-blue-700">←</span>
                     <span></span>
                 </div>
-                <div class="text-gray-400"><---></div>
-                <div id="person2-name" class="flex items-center gap-2">
+                <div class="text-gray-400">
+                    <--->
+                </div>
+                <div id="person2" class="flex items-center gap-2">
                     <span></span>
                     <span class="text-red-700">→</span>
                 </div>
@@ -140,7 +159,8 @@
         </section>
         <!-- Average Messages per Session -->
         <section>
-            <h2 class="text-xl font-semibold mb-2">🗂️ Total Messages per Session</h2>
+            <h2 class="text-xl font-semibold mb-1">🗂️ Total Messages per Session</h2>
+            <p class="text-sm mb-4 text-gray-500">(sections are seperated by 8 hours of inactivity)</p>
             <div class="flex flex-col gap-3 text-center sm:flex-row sm:justify-between">
                 <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 flex-1">
                     <div class="text-gray-700 font-semibold text-sm">Minimum</div>
@@ -192,17 +212,14 @@
     <script>
     const params = new URLSearchParams(window.location.search);
     const summaryid = params.get('id') || 'noid';
-    const SUMMARY_URL = "http://localhost:3033/summary";
-
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').classList.remove('hidden');
+    const SUMMARY_URL = "__SUMMARY_URL__";
 
     function updatePersonText(person1text, person2text) {
-        const element_person1 = document.querySelectorAll(`[id^="person1"]`);
+        const element_person1 = document.querySelectorAll(`[id="person1"]`);
         element_person1.forEach(el => {
             el.innerHTML = person1text;
         });
-        const element_person2 = document.querySelectorAll(`[id^="person2"]`);
+        const element_person2 = document.querySelectorAll(`[id="person2"]`);
         element_person2.forEach(el => {
             el.innerHTML = person2text;
         });
@@ -271,14 +288,6 @@
         if (durationEl) durationEl.textContent = totalDuration;
     }
 
-    function updateMessagesPerSession(msgs1, msgs2) {
-        const el1 = document.getElementById("person1-msgpersession");
-        const el2 = document.getElementById("person2-msgpersession");
-
-        if (el1) el1.textContent = msgs1;
-        if (el2) el2.textContent = msgs2;
-    }
-
     function updateSessionCount(count) {
         const el = document.getElementById("session-count");
         if (el) el.textContent = `${count} Sessions`;
@@ -302,45 +311,72 @@
         if (maxEl) maxEl.textContent = max;
     }
 
+    function showErrorModal(message) {
+        const modal = document.getElementById('errorModal');
+        const msgBox = document.getElementById('errorMessage');
+        msgBox.textContent = message;
+        modal.classList.remove('hidden');
+    }
 
-    //example uses
-    updatePersonText("per1", "per2");
-    updatePersonWords(["word1-pr1", "word2-pr1", "word3-pr1", "word4-pr1", "word5-pr1"],
-        ["word1-pr2", "word2-pr2", "word3-pr2", "word4-pr2", "word5-pr2"], );
-    updateEmoji("😂", "😂");
-    updateAllResponseTimes("1s", "12s", "2m 3s", "800ms", "9s", "1m 45s");
-    updateStarters("per1", "hi yo", "per2", "wassup")
-    updateDateRange("March 3, 2022", "July 16, 2025", "3 years, 4 months, 13 days");
-    updateMessagesPerSession("50", "24");
-    updateSessionCount("200");
-    updateTotalMessagesSent("5000", "7500")
-    updateGlobalMsgStats(34, 12, 58)
+    function closeErrorModal() {
+        document.getElementById('errorModal').classList.add('hidden');
+    }
+
 
     async function fetchSummary() {
-        try {
-            const response = await fetch(SUMMARY_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: summaryid
-            });
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-
-            populateSummary(data);
-
-        } catch (err) {
-            console.error('Failed to fetch summary:', err);
-            alert('Failed to load summary.');
-        } finally {
-            // Hide loading, show content
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').classList.remove('hidden');
+        if (summaryid == 'noid') {
+            showErrorModal("No id is provided, please go back to the home page.");
+        } else {
+            try {
+                const response = await fetch(SUMMARY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: summaryid
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                if (!Array.isArray(data.chatters) || data.chatters.length < 2) showErrorModal("invalid server response");
+                updatePersonText(data.chatters[0], data.chatters[1]);
+                updatePersonWords(
+                    data.topWordsPerUser[data.chatters[0]],
+                    data.topWordsPerUser[data.chatters[1]]
+                );
+                updateEmoji(data.getTopEmojiPerUser[data.chatters[0]], data.getTopEmojiPerUser[data.chatters[1]]);
+                const person1name = data.chatters[0];
+                const person2name = data.chatters[1];
+                const person1resptime = data.timeBetweenMsg.find(u => u.user === person1name);
+                const person2resptime = data.timeBetweenMsg.find(u => u.user === person2name);
+                updateAllResponseTimes(
+                    person1resptime.fastestMinutes,
+                    person1resptime.averageMinutes,
+                    person1resptime.slowestMinutes,
+                    person2resptime.fastestMinutes,
+                    person2resptime.averageMinutes,
+                    person2resptime.slowestMinutes);
+                updateStarters(
+                    data.chatters[0],
+                    data.topStartersPerUser[data.chatters[0]].map(s => s.starter)[0],
+                    data.chatters[1],
+                    data.topStartersPerUser[data.chatters[1]].map(s => s.starter)[0]
+                );
+                updateDateRange(data.range.start, data.range.end, data.range.duration);
+                updateGlobalMsgStats(
+                    data.avgMessagePerSession,
+                    data.minMessagePerSession,
+                    data.maxMessagePerSession)
+                updateSessionCount(data.totalSessionCount);
+                updateTotalMessagesSent(data.messagesByEachUserCount[data.chatters[0]], data.messagesByEachUserCount[data.chatters[1]])
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').classList.remove('hidden');
+            } catch (err) {
+                showErrorModal("Failed to fetch summary data.");
+            }
         }
     }
 
+
     // Run immediately on load
-    //window.addEventListener('DOMContentLoaded', fetchSummary);
+    window.addEventListener('DOMContentLoaded', fetchSummary);
     </script>
 </body>
 

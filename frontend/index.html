@@ -12,7 +12,6 @@
 </head>
 
 <body class="bg-gradient-to-br from-slate-800 to-slate-950 min-h-screen flex flex-col items-center justify-center p-6 text-white">
-    <!-- Error Modal -->
     <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white p-6 rounded-xl shadow-lg w-80">
             <h2 class="text-lg font-semibold text-red-600 mb-2">Error</h2>
@@ -42,8 +41,8 @@
     FilePond.registerPlugin();
     let socket;
     let folderid;
-    const WS_URL = "ws://localhost:3034";
-    const UPLOAD_URL = "http://localhost:3033/upload";
+    const WS_URL = "__WS_URL__";
+    const UPLOAD_URL = "__UPLOAD_URL__";
     const SUMMARY_PAGE = "summary.html";
     const pond = FilePond.create(document.querySelector('input[type="file"]'), {
         acceptedFileTypes: ['application/zip', 'text/plain'],
@@ -126,7 +125,6 @@
     }
 
     pond.on('addfile', async (error, fileItem) => {
-        if (error) return console.error(error);
         showProcessingOverlay();
 
         const file = fileItem.file;
@@ -167,8 +165,6 @@
                 folderid = data.folder;
             }
 
-        } catch (err) {
-            console.error('Failed to process file:', err);
         } finally {
             socket = new WebSocket(WS_URL);
             await waitForSocketConnection(socket);

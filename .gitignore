@@ -143,3 +143,5 @@ test.js
 roadmap
 *.txt
 dbtest.js
+tmp
+tmp/
