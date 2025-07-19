@@ -28,8 +28,8 @@ jobs:
       - name: Replace environment variables
         run: |
           find . -type f -name "*.html" -print0 | xargs -0 sed -i \
-            -e 's|__WS_URL__|${{ secrets.PROD_WS_URL }}|g' \
-            -e 's|__UPLOAD_URL__|${{ secrets.PROD_UPLOAD_URL }}|g'
+            -e 's|PROD_SUMMARY_URL|${{ secrets.PROD_SUMMARY_URL }}|g' \
+            -e 's|PROD_UPLOAD_URL|${{ secrets.PROD_UPLOAD_URL }}|g'
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
