@@ -6,7 +6,7 @@ const Busboy = require('busboy');
 const parser = require('./parse');
 const db = require('./db');
 
-const HTTP_PORT = BACKEND_PORT;
+const HTTP_PORT = 80;
 
 const TMP_DIR = path.join(__dirname, 'tmp');
 
