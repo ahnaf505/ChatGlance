@@ -3,8 +3,6 @@ const {
   getFirestore, doc, setDoc, getDoc,
   updateDoc, deleteDoc
 } = require('firebase/firestore');
-const dotenv = require('dotenv');
-dotenv.config();
 
 // Initialize Firebase using client config (ENV variables or inline)
 const firebaseConfig = {
