@@ -1,6 +1,4 @@
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
 const crypto = require('crypto');
 const Busboy = require('busboy');
 const parser = require('./parse');
@@ -8,23 +6,7 @@ const db = require('./db');
 
 const HTTP_PORT = 80;
 
-const TMP_DIR = path.join(__dirname, 'tmp');
-
-// Utility: Generate unique directory
-async function generateUniqueDir(baseDir) {
-    while (true) {
-        const dirName = crypto.randomBytes(8).toString('hex');
-        const fullPath = path.join(baseDir, dirName);
-        try {
-            await fs.promises.access(fullPath);
-        } catch (err) {
-            await fs.promises.mkdir(fullPath, { recursive: true });
-            return { dirName, fullPath };
-        }
-    }
-}
-
-async function processChat(folderid) {
+async function processChat(dump) {
     const result = {
         status: 'success',
         chatters: '',
@@ -41,11 +23,9 @@ async function processChat(folderid) {
         messagesSentPerDay: {}
     };
 
-    const deletePath = path.join(__dirname, 'tmp', folderid);
 
     try {
-        const filepath = path.join(__dirname, 'tmp', folderid, 'chats.txt');
-        const fileContent = fs.readFileSync(filepath, 'utf8');
+        const fileContent = dump
         const cleanedChat = parser.cleanChatLines(fileContent).join('\n');
         const parsed = parser.parseChat(cleanedChat);
         if (!Array.isArray(parsed) || parsed.length === 0) {
@@ -94,19 +74,12 @@ async function processChat(folderid) {
 
         const sessionid = await db.generateUniqueSessionId();
         await db.createStats(sessionid, result);
-
-        fs.rmSync(deletePath, { recursive: true, force: true });
-
         return JSON.stringify({ status: 'success', id: sessionid });
 
     } catch (err) {
-        fs.rmSync(deletePath, { recursive: true, force: true });
-
         return JSON.stringify({
             status: 'error',
-            message: err.code === 'ENOENT' ? 'Invalid file format' :
-                     err.code === 'EACCES' ? 'Permission denied' :
-                     err.message
+            message: err.code === 'ENOENT' ? 'Invalid file format' : err.code === 'EACCES' ? 'Permission denied' : err.message
         });
     }
 }
@@ -127,20 +100,20 @@ const httpServer = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/upload') {
         try {
             await fs.promises.mkdir(TMP_DIR, { recursive: true });
-            const { dirName, fullPath } = await generateUniqueDir(TMP_DIR);
             const busboy = Busboy({ headers: req.headers });
 
-            const savePath = path.join(fullPath, "chats.txt");
-            const writeStream = fs.createWriteStream(savePath);
+            let fileBuffer = Buffer.alloc(0);
 
             busboy.on('file', (fieldname, file, info) => {
-                file.pipe(writeStream);
+                file.on('data', (chunk) => {
+                    fileBuffer = Buffer.concat([fileBuffer, chunk]);
+                });
             });
 
             busboy.on('finish', async () => {
                 try {
-                    await new Promise(resolve => writeStream.on('finish', resolve));
-                    const data = await processChat(dirName);
+                    const fileContent = fileBuffer.toString('utf8');
+                    const data = await processChat(fileContent);
                     res.end(data);
                 } catch (err) {
                     res.writeHead(500);
@@ -149,11 +122,11 @@ const httpServer = http.createServer(async (req, res) => {
             });
 
             req.pipe(busboy);
-
         } catch (err) {
             res.writeHead(500);
             res.end('Internal Server Error');
         }
+
     } else if (req.method === 'POST' && req.url === '/summary') {
         let body = '';
         req.on('data', chunk => {
