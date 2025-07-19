@@ -124,7 +124,7 @@ const httpServer = http.createServer(async (req, res) => {
             req.pipe(busboy);
         } catch (err) {
             res.writeHead(500);
-            res.end('Internal Server Error');
+            res.end(`Internal Server Error: ${err}`);
         }
 
     } else if (req.method === 'POST' && req.url === '/summary') {
