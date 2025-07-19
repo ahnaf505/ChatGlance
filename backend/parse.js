@@ -308,7 +308,7 @@ function getTopSentenceStartersFuzzy(parsedData, targetUser, options = {}) {
 }
 
 
-function getChatSessions(parsedData, sessionGapMinutes = 120) {
+function getChatSessions(parsedData, sessionGapMinutes = 480) {
     if (!parsedData.length) return [];
 
     const sessions = [];
