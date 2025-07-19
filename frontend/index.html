@@ -12,7 +12,7 @@
 </head>
 
 <body class="bg-gradient-to-br from-slate-800 to-slate-950 min-h-screen flex flex-col items-center justify-center p-6 text-white">
-    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden">
         <div class="bg-white p-6 rounded-xl shadow-lg w-80">
             <h2 class="text-lg font-semibold text-red-600 mb-2">Error</h2>
             <p id="errorMessage" class="text-gray-800 mb-4">Something went wrong.</p>
@@ -41,8 +41,7 @@
     FilePond.registerPlugin();
     let socket;
     let folderid;
-    const WS_URL = "__WS_URL__";
-    const UPLOAD_URL = "__UPLOAD_URL__";
+    const UPLOAD_URL = "UPLOAD_URL";
     const SUMMARY_PAGE = "summary.html";
     const pond = FilePond.create(document.querySelector('input[type="file"]'), {
         acceptedFileTypes: ['application/zip', 'text/plain'],
@@ -79,50 +78,6 @@
         });
     }
 
-    function sendWhenReady(message) {
-        return new Promise((resolve) => {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(message);
-                return resolve();
-            }
-
-            const interval = setInterval(() => {
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    socket.send(message);
-                    clearInterval(interval);
-                    resolve();
-                }
-            }, 100);
-        });
-    }
-
-
-    function waitForNextMessage(socket) {
-        return new Promise((resolve) => {
-            function handler(event) {
-                socket.removeEventListener('message', handler);
-                resolve(event.data);
-            }
-
-            socket.addEventListener('message', handler);
-        });
-    }
-
-
-    function handleWSResponse(msg) {
-        try {
-            const data = JSON.parse(msg);
-            if (data.status === 'error') {
-                hideProcessingOverlay();
-                showErrorModal(data.message);
-                return false;
-            }
-            return true; // status is 'success' or other
-        } catch (err) {
-            showErrorModal(data.message);
-            return false;
-        }
-    }
 
     pond.on('addfile', async (error, fileItem) => {
         showProcessingOverlay();
@@ -145,39 +100,38 @@
                             body: formData
                         });
 
-                        const raw = await response.text(); // optional, if you want raw
-                        const data = JSON.parse(raw); // convert to object
-                        folderid = data.folder;
-                        break; // Stop after first .txt file
+                        const raw = await response.text();
+                        const data = JSON.parse(raw);
+                        if (data.status == 'error') {
+                            showErrorModal(data.message);
+                            hideProcessingOverlay();
+                        } else {
+                            window.location = `/${SUMMARY_PAGE}?id=${data.id}`;
+                        }
+                        break;
                     }
                 }
             } else if (file.type === 'text/plain') {
                 const formData = new FormData();
-                formData.append('file', file);
+                formData.append('file', file, file.name);
 
                 const response = await fetch(UPLOAD_URL, {
                     method: 'POST',
                     body: formData
                 });
 
-                const raw = await response.text(); // optional, if you want raw
-                const data = JSON.parse(raw); // convert to object
-                folderid = data.folder;
+                const raw = await response.text();
+                const data = JSON.parse(raw);
+                if (data.status == 'error') {
+                    showErrorModal(data.message);
+                    hideProcessingOverlay();
+                } else {
+                    window.location = `/${SUMMARY_PAGE}?id=${data.id}`;
+                }
             }
 
-        } finally {
-            socket = new WebSocket(WS_URL);
-            await waitForSocketConnection(socket);
-
-            await sendWhenReady(`process=${folderid}`);
-
-            const msg = await waitForNextMessage(socket);
-            const status = handleWSResponse(msg);
-
-            if (status === true) {
-                await sendWhenReady('wheresummary');
-                const summaryid = await waitForNextMessage(socket);
-                window.location.href = `/${SUMMARY_PAGE}?id=${summaryid}`;            }
+        } catch(err) {
+            showErrorModal(err);
         }
     });
     </script>
