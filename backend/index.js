@@ -23,9 +23,8 @@ async function processChat(dump) {
         messagesSentPerDay: {}
     };
 
-
     try {
-        const fileContent = dump
+        const fileContent = dump;
         const cleanedChat = parser.cleanChatLines(fileContent).join('\n');
         const parsed = parser.parseChat(cleanedChat);
         if (!Array.isArray(parsed) || parsed.length === 0) {
@@ -98,44 +97,36 @@ const httpServer = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && req.url === '/upload') {
-        try {
-            await fs.promises.mkdir(TMP_DIR, { recursive: true });
-            const busboy = Busboy({ headers: req.headers });
+        const busboy = Busboy({ headers: req.headers });
+        let fileBuffer = Buffer.alloc(0);
 
-            let fileBuffer = Buffer.alloc(0);
-
-            busboy.on('file', (fieldname, file, info) => {
-                file.on('data', (chunk) => {
-                    fileBuffer = Buffer.concat([fileBuffer, chunk]);
-                });
+        busboy.on('file', (fieldname, file, info) => {
+            file.on('data', (chunk) => {
+                fileBuffer = Buffer.concat([fileBuffer, chunk]);
             });
+        });
 
-            busboy.on('finish', async () => {
-                try {
-                    const fileContent = fileBuffer.toString('utf8');
-                    const data = await processChat(fileContent);
-                    res.end(data);
-                } catch (err) {
-                    res.writeHead(500);
-                    res.end('Internal Server Error');
-                }
-            });
+        busboy.on('finish', async () => {
+            try {
+                const fileContent = fileBuffer.toString('utf8');
+                const data = await processChat(fileContent);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(data);
+            } catch (err) {
+                res.writeHead(500);
+                res.end('Internal Server Error');
+            }
+        });
 
-            req.pipe(busboy);
-        } catch (err) {
-            res.writeHead(500);
-            res.end(`Internal Server Error: ${err}`);
-        }
-
+        req.pipe(busboy);
     } else if (req.method === 'POST' && req.url === '/summary') {
         let body = '';
         req.on('data', chunk => {
-            body += chunk.toString(); // expecting plain text ID
+            body += chunk.toString();
         });
 
         req.on('end', async () => {
             const id = body.trim();
-
             if (!id) {
                 res.writeHead(400);
                 res.end('Missing session ID');
@@ -153,10 +144,9 @@ const httpServer = http.createServer(async (req, res) => {
                 }
             } catch (err) {
                 res.writeHead(500);
-                res.end('Internal Server Error');
+                res.end('Internal Server Error', err);
             }
         });
-
     } else {
         res.writeHead(404);
         res.end('Not Found');
