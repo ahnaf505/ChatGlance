@@ -11,10 +11,13 @@ ChatGlance is a web application that analyzes your WhatsApp chat exports to prov
 - **Chat Duration**: View the total time span of your conversation
 - **Message Statistics**: See total messages, sessions, and averages
 
-## Screenshots 📸
+## 📸 Screenshots
 
-![Home Page](img/home.png)
-![Analysis Dashboard](img/summary.png)
+<p align="center">
+  <img src="img/home.png" alt="Home Page" width="35%" style="margin-right: 5%;">
+  <img src="img/summary.png" alt="Analysis Dashboard" width="28%">
+</p>
+
 
 ## Getting Started 🚀
 
