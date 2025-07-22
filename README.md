@@ -13,8 +13,8 @@ ChatGlance is a web application that analyzes your WhatsApp chat exports to prov
 
 ## Screenshots 📸
 
-![Upload Page](notimplemented)
-![Analysis Dashboard](notimplemented)
+![Home Page](img/home.png)
+![Analysis Dashboard](img/summary.png)
 
 ## Getting Started 🚀
 
