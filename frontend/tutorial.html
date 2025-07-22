@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGlance | Chat export guide</title>
+    <title>ChatGlance | Chat export tutorial</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -13,29 +14,13 @@
             extend: {
                 colors: {
                     primary: {
-                        50: '#e6f7ee',
-                        100: '#c1e9d6',
-                        200: '#98dbbb',
-                        300: '#6dcca0',
-                        400: '#4bc18c',
-                        500: '#25b678',
-                        600: '#1da66c',
-                        700: '#0f935e',
-                        800: '#008251',
-                        900: '#00633b',
+                        500: '#6366f1', // Using indigo from ChatGlance
+                        600: '#4f46e5',
+                    },
+                    slate: {
+                        800: '#1e293b',
+                        950: '#020617'
                     }
-                },
-                fontSize: {
-                    'xs': '.75rem',
-                    'sm': '.875rem',
-                    'base': '1rem',
-                    'lg': '1.125rem',
-                    'xl': '1.25rem',
-                    '2xl': '1.5rem',
-                    '3xl': '1.875rem',
-                    '4xl': '2.25rem',
-                    '5xl': '3rem',
-                    '6xl': '4rem',
                 }
             }
         }
@@ -43,274 +28,154 @@
     </script>
 </head>
 
-<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <!-- Sticky Header -->
-    <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm">
-        <!-- Platform Switcher Only -->
-        <div class="bg-primary-500/10 dark:bg-primary-900/20">
-            <div class="container mx-auto px-4 py-2">
-                <div class="flex justify-between items-center space-x-2">
-                    <div class="inline-flex bg-white dark:bg-gray-800 rounded-full p-0.5 shadow-md">
-                        <button id="android-btn" class="platform-btn px-3 py-1.5 text-sm md:text-base md:px-4 md:py-2 rounded-full font-medium flex items-center transition-all duration-300 bg-primary-500 text-white">
-                            <i class="fab fa-android mr-1 md:mr-2"></i>
-                            <span class="hidden sm:inline">Android</span>
-                        </button>
-                        <button id="ios-btn" class="platform-btn px-3 py-1.5 text-sm md:text-base md:px-4 md:py-2 rounded-full font-medium flex items-center transition-all duration-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i class="fab fa-apple mr-1 md:mr-2"></i>
-                            <span class="hidden sm:inline">iOS</span>
-                        </button>
-                    </div>
-                    <div class="flex items-center space-x-1 md:space-x-2">
-                        <button id="theme-toggle" class="p-1.5 md:p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            <i class="fas fa-moon text-sm md:text-base hidden dark:inline-block"></i>
-                            <i class="fas fa-sun text-sm md:text-base dark:hidden"></i>
-                        </button>
-                        <a href="#start" class="text-sm md:text-base bg-primary-500 hover:bg-primary-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium transition-colors">
-                            Get Started
-                        </a>
-                    </div>
+<body class="bg-gradient-to-br from-slate-800 to-slate-950 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8 flex flex-col items-center">
+        <main class="w-full max-w-3xl" id="start">
+            <div class="bg-slate-800/50 rounded-xl shadow-md overflow-hidden backdrop-blur-sm">
+                <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-8 text-center">
+                    <h1 class="text-3xl md:text-4xl font-bold mb-4">WhatsApp Chat Export Guide</h1>
+                    <p class="text-lg opacity-90">Step-by-step instructions to prepare your chats for ChatGlance analysis</p>
                 </div>
-            </div>
-        </div>
-    </header>
-    
-    <div class="container mx-auto px-4 py-4 md:py-8 flex flex-col lg:flex-row gap-4 md:gap-8">
-        <!-- Main Content -->
-        <main class="flex-1" id="start">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-                <!-- Hero Section -->
-                <div class="bg-gradient-to-r from-primary-500 to-primary-700 p-6 md:p-8 text-white">
-                    <div class="flex flex-col">
-                        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4">How to Export Your WhatsApp Chats</h1>
-                        <p class="text-base md:text-lg opacity-90">Step-by-Step Guide for ChatGlance Integration</p>
-                    </div>
-                </div>
-                
-                <!-- Platform Notice -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800 p-3 md:p-4">
-                    <div class="flex items-center">
-                        <i class="fas fa-info-circle text-blue-500 dark:text-blue-400 mr-2 text-lg md:text-xl"></i>
-                        <p class="text-sm md:text-base text-blue-700 dark:text-blue-300">Viewing <strong class="font-semibold">Android</strong> instructions. <button id="switch-to-ios" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">Switch to iOS</button></p>
-                    </div>
-                </div>
-                
-                <!-- Tutorial Steps - Android -->
-                <div id="android-content" class="divide-y divide-gray-200 dark:divide-gray-700">
-                    <!-- Step 1 Android -->
-                    <div id="step1" class="p-4 md:p-6 lg:p-8">
+                <div class="divide-y divide-slate-700">
+                    <div class="p-6">
                         <div class="flex items-start">
-                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-lg p-2 md:p-3 mr-3 md:mr-4">
-                                <i class="fas fa-mobile-alt text-primary-600 dark:text-primary-300 text-lg md:text-xl"></i>
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">1</span>
                             </div>
                             <div>
-                                <div class="flex items-center mb-1 md:mb-2">
-                                    <span class="bg-primary-500 text-white text-xs md:text-sm font-medium px-2 py-0.5 md:px-3 md:py-1 rounded-full mr-2 md:mr-3">1</span>
-                                    <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">Open WhatsApp</h2>
-                                </div>
-                                <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-3 md:mb-4">Locate and open WhatsApp on your Android device. Ensure you're logged in to the correct account.</p>
-                                <div class="flex justify-center">
-                                    <img src="https://via.placeholder.com/200x400/f5f5f5/555555?text=Android+WhatsApp+Home" alt="Android WhatsApp Home Screen" class="rounded-lg shadow-md w-40 md:w-48 h-auto border border-gray-200 dark:border-gray-600">
-                                </div>
-                                <div class="mt-3 md:mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 md:p-4">
-                                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-lightbulb text-primary-500 mr-1 md:mr-2"></i> <strong>Tip:</strong> Ensure sufficient storage space before exporting large chats.</p>
+                                <h2 class="text-xl font-bold mb-3">Open the chat you wish to export</h2>
+                                <p class="text-slate-300 mb-4">Navigate to the WhatsApp conversation you intend to export.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">2</span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold mb-3">Tap the three-dot menu in the upper-right corner</h2>
+                                <p class="text-slate-300 mb-4">Tap the vertical ellipsis (three-dot) icon to open the options menu.</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/tapthreedot.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Step 2 Android -->
-                    <div id="step2" class="p-4 md:p-6 lg:p-8">
+                    <div class="p-6">
                         <div class="flex items-start">
-                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-lg p-2 md:p-3 mr-3 md:mr-4">
-                                <i class="fas fa-comment-dots text-primary-600 dark:text-primary-300 text-lg md:text-xl"></i>
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">3</span>
                             </div>
                             <div>
-                                <div class="flex items-center mb-1 md:mb-2">
-                                    <span class="bg-primary-500 text-white text-xs md:text-sm font-medium px-2 py-0.5 md:px-3 md:py-1 rounded-full mr-2 md:mr-3">2</span>
-                                    <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">Select Chat to Export</h2>
-                                </div>
-                                <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-3 md:mb-4">Navigate to the specific conversation (individual or group) you wish to export.</p>
-                                <div class="flex justify-center">
-                                    <img src="https://via.placeholder.com/200x400/f5f5f5/555555?text=Android+Chat+Screen" alt="Android WhatsApp Chat Screen" class="rounded-lg shadow-md w-40 md:w-48 h-auto border border-gray-200 dark:border-gray-600">
+                                <h2 class="text-xl font-bold mb-3">Select "More" from the menu</h2>
+                                <p class="text-slate-300 mb-4">From the opened menu, tap “More” to reveal additional actions including chat export.</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/openedmenu.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Additional steps would continue here... -->
-                </div>
-                
-                <!-- Tutorial Steps - iOS (Hidden by default) -->
-                <div id="ios-content" class="divide-y divide-gray-200 dark:divide-gray-700 hidden">
-                    <!-- Step 1 iOS -->
-                    <div id="step1-ios" class="p-4 md:p-6 lg:p-8">
+                    <div class="p-6">
                         <div class="flex items-start">
-                            <div class="flex-shrink-0 bg-primary-100 dark:bg-primary-900 rounded-lg p-2 md:p-3 mr-3 md:mr-4">
-                                <i class="fas fa-mobile-alt text-primary-600 dark:text-primary-300 text-lg md:text-xl"></i>
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">4</span>
                             </div>
                             <div>
-                                <div class="flex items-center mb-1 md:mb-2">
-                                    <span class="bg-primary-500 text-white text-xs md:text-sm font-medium px-2 py-0.5 md:px-3 md:py-1 rounded-full mr-2 md:mr-3">1</span>
-                                    <h2 class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">Open WhatsApp</h2>
-                                </div>
-                                <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-3 md:mb-4">Locate and open WhatsApp on your iPhone. Ensure you're logged in to the correct account.</p>
-                                <div class="flex justify-center">
-                                    <img src="https://via.placeholder.com/200x400/f5f5f5/555555?text=iOS+WhatsApp+Home" alt="iOS WhatsApp Home Screen" class="rounded-lg shadow-md w-40 md:w-48 h-auto border border-gray-200 dark:border-gray-600">
-                                </div>
-                                <div class="mt-3 md:mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 md:p-4">
-                                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-lightbulb text-primary-500 mr-1 md:mr-2"></i> <strong>Tip:</strong> Enable iCloud backups first if needed.</p>
+                                <h2 class="text-xl font-bold mb-3">Tap "Export chat"</h2>
+                                <p class="text-slate-300 mb-4">Initiate the export process by selecting "Export chat." The conversation will be saved as a text file. This process may take a few moments.</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/exportchat.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Additional iOS steps would continue here... -->
-                </div>
-                
-                <!-- Completion Section -->
-                <div class="bg-primary-50 dark:bg-gray-700 p-6 md:p-8 text-center">
-                    <i class="fas fa-check-circle text-4xl md:text-5xl text-primary-500 dark:text-primary-400 mb-3 md:mb-4"></i>
-                    <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-1 md:mb-2">Congratulations!</h2>
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-4 md:mb-6">You've learned how to export WhatsApp chats. Now you can analyze or backup your conversations.</p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-2 md:gap-4">
-                        <button class="text-sm md:text-base flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium shadow-sm transition-colors">
-                            <i class="far fa-bookmark mr-1 md:mr-2"></i>
-                            Save Guide
-                        </button>
-                        <button class="text-sm md:text-base flex items-center justify-center bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-colors">
-                            <i class="fas fa-share-alt mr-1 md:mr-2"></i>
-                            Share
-                        </button>
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">5</span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold mb-3">If prompted, choose "Without media"</h2>
+                                <p class="text-slate-300 mb-4">If the chat contains media, you will be asked whether to include it. Select “Without media” for a faster and smaller export.</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/includemedia.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">6</span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold mb-3">Send the exported file to yourself</h2>
+                                <p class="text-slate-300 mb-4">Once exported, share the resulting .zip file with yourself for easier access on your device.</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/selfsend.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">7</span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold mb-3">Extract the ZIP file using a file manager</h2>
+                                <p class="text-slate-300 mb-4">Use your device’s file manager or a third-party app such as ZArchiver to extract the contents. Extract it to an easily accessible location like ‘Downloads’ or ‘Documents’.
+                                    <br>Note: While ChatGlance supports ZIP files, extracting them simplifies navigation and file selection.</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/extract.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">8</span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold mb-3">Upload your chat file to <a class="text-blue-500" href="https://chatglance.ahnaf.id">ChatGlance</a></h2>
+                                <p class="text-slate-300 mb-4">Visit <a class="text-blue-500" href="https://chatglance.ahnaf.id">ChatGlance</a>, click “Browse,” and select your extracted text file. On some devices, it may appear under “Photos and videos.”</p>
+                                <div class="flex justify-start">
+                                    <img src="/img/upload.png" class="rounded-lg shadow-md w-48 h-auto border border-slate-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="final-step" class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary-500 rounded-lg p-3 mr-4">
+                                <span class="text-white font-bold">10</span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold mb-3">Analyze your conversation with ChatGlance</h2>
+                                <p class="text-slate-300 mb-4">Once the file is uploaded, ChatGlance will generate a detailed overview of your conversation patterns and interactions.</p>
+                                <div class="flex flex-col items-center">
+                                    <a href="https://chatglance.ahnaf.id" target="_blank" class="w-full max-w-xs inline-flex items-center justify-center bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                                        Analyze Your Chat
+                                        <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-    
     <!-- Footer -->
-    <footer class="bg-gray-100 dark:bg-gray-800 mt-8 md:mt-12">
-        <div class="container mx-auto px-4 py-8 md:py-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                <div>
-                    <h3 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-2 md:mb-4">Chat Export Guide</h3>
-                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300">Comprehensive tutorial for WhatsApp chat export and analysis.</p>
-                </div>
-                <div>
-                    <h3 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-2 md:mb-4">Quick Links</h3>
-                    <ul class="space-y-1 md:space-y-2">
-                        <li><a href="#start" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">Getting Started</a></li>
-                        <li><a href="#step1" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">Tutorial Steps</a></li>
-                        <li><a href="https://chatglance.ahnaf.id" target="_blank" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">ChatGlance</a></li>
-                    </ul>
-                </div>
-                <div id="contact">
-                    <h3 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-2 md:mb-4">Contact</h3>
-                    <ul class="space-y-1 md:space-y-2">
-                        <li class="flex items-center text-xs md:text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-envelope mr-1 md:mr-2"></i> support@example.com</li>
-                        <li class="flex items-center text-xs md:text-sm text-gray-600 dark:text-gray-300"><i class="fas fa-phone mr-1 md:mr-2"></i> +1 (555) 123-4567</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-2 md:mb-4">Follow Us</h3>
-                    <div class="flex space-x-3 md:space-x-4">
-                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors text-lg"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors text-lg"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors text-lg"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-200 dark:border-gray-700 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                <p>© 2023 ChatGlance. All rights reserved.</p>
+    <footer class="bg-slate-800/50 mt-12 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col items-center text-center">
+                <p class="text-slate-500">© 2025 ChatGlance — Built by Ahnaf</p>
             </div>
         </div>
     </footer>
-    
-    <!-- Back to Top Button -->
-    <button id="back-to-top" class="fixed bottom-4 right-4 md:bottom-8 md:right-8 bg-primary-500 text-white p-2 md:p-3 rounded-full shadow-lg opacity-0 invisible transition-all duration-300">
-        <i class="fas fa-arrow-up text-sm md:text-base"></i>
-    </button>
-    
-    <script>
-    // Dark/Light mode toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    const html = document.documentElement;
-
-    themeToggle.addEventListener('click', () => {
-        html.classList.toggle('dark');
-        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-    });
-
-    // Check for saved theme preference
-    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        html.classList.add('dark');
-    } else {
-        html.classList.remove('dark');
-    }
-
-    // Back to top button
-    const backToTopButton = document.getElementById('back-to-top');
-
-    window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-            backToTopButton.classList.remove('opacity-0', 'invisible');
-            backToTopButton.classList.add('opacity-100', 'visible');
-        } else {
-            backToTopButton.classList.remove('opacity-100', 'visible');
-            backToTopButton.classList.add('opacity-0', 'invisible');
-        }
-    });
-
-    backToTopButton.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    // Platform switcher functionality
-    const androidBtn = document.getElementById('android-btn');
-    const iosBtn = document.getElementById('ios-btn');
-    const switchToIos = document.getElementById('switch-to-ios');
-    const androidContent = document.getElementById('android-content');
-    const iosContent = document.getElementById('ios-content');
-
-    function showAndroid() {
-        androidBtn.classList.add('bg-primary-500', 'text-white');
-        androidBtn.classList.remove('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
-        iosBtn.classList.remove('bg-primary-500', 'text-white');
-        iosBtn.classList.add('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
-        androidContent.classList.remove('hidden');
-        iosContent.classList.add('hidden');
-    }
-
-    function showIos() {
-        iosBtn.classList.add('bg-primary-500', 'text-white');
-        iosBtn.classList.remove('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
-        androidBtn.classList.remove('bg-primary-500', 'text-white');
-        androidBtn.classList.add('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
-        iosContent.classList.remove('hidden');
-        androidContent.classList.add('hidden');
-    }
-
-    androidBtn.addEventListener('click', showAndroid);
-    iosBtn.addEventListener('click', showIos);
-    switchToIos.addEventListener('click', showIos);
-
-    // Set Android as default
-    showAndroid();
-    </script>
 </body>
+
 </html>
